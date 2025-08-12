@@ -11,11 +11,7 @@ async function login({username}) {
 }
 
 async function signUp(data) {
-    const data2 = {
-        ...data,
-        puuid : "v5_J1K8FgL9I0B7cWfH2DqRtXzyQWErTYuiOpLkjhGFdsAzXcvBNm12345qwertyuiop"
-    }
-    const newUser = await User.insertOne(data2)
+    const newUser = await User.insertOne(data)
     console.log(newUser)
     return newUser;
 }

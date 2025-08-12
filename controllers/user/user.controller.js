@@ -6,6 +6,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 const {privateKey} = require("../../middlewares/auth.middleware");
+const {verifyRiotAccount} = require("../function_api_Riot");
 
 
 async function getUsers(req, res) {
@@ -35,7 +36,6 @@ async function login(req, res) {
             secure: process.env.NODE_ENV === 'production',
             maxAge: expiresIn * 1000
         });
-
         return res.status(200).json({ ...user.toObject(), password: undefined });
     } catch (e) {
         return res.status(500).json(e.message);
@@ -44,15 +44,22 @@ async function login(req, res) {
 
 async function signUp(req, res) {
     try {
-        const data = req.body;
-        console.log(data);
-        if (!data.username || !data.password) {
+        const { username, tagLine, region, password } = req.body;
+        if (!username || !password) {
             return res.status(400).json("Nom d'utilisateur et mot de passe requis.");
         }
-        const hashedPassword = bcrypt.hashSync(data.password, 10);
+
+        const riotData = await verifyRiotAccount(username, tagLine, region);
+        console.log("Compte Riot trouvé :", riotData);
+
+        const hashedPassword = bcrypt.hashSync(password, 10);
+
         let user = await UserService.signUp({
-            ...data,
-            password: hashedPassword
+            username,
+            tagLine,
+            region,
+            password: hashedPassword,
+            puuid:riotData.puuid,
         });
 
 
